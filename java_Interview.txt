@@ -1,0 +1,137 @@
+1. 九种基本数据类型的大小，以及他们的封装类。
+	类型         大小（字节）  包装类
+	byte          1        Byte
+	short         2        Short
+	char          4        Character
+	int           4        Integer
+	long          8        Long
+	float         4        Float
+	double        8        Double
+	boolean       1/8      Boolean
+	
+2. Switch能否用string做参数？
+	JDK1.7之前Switch只能判断byte、short、char、int，JDK1.7开始Switch可以判断String
+	
+3. equals与==的区别。
+	==：是判断两个变量或实例是不是指向同一个内存空间
+	equals：是判断两个变量或实例所指向的内存空间的值是不是相同
+	
+4. Object有哪些公用方法？
+	clone：实现对象的浅复制
+	equals：判断两个对象是否相等
+	hashcode：该方法用于哈希查找
+	getclass：获得运行时类型
+	toString：转换成字符串
+	wait：使当前线程等待
+	notify：唤醒在该对象上等待的某个线程
+	notifyAll：唤醒在该对象上等待的所有线程
+
+5. Java的四种引用，强弱软虚，用到的场景。
+	强引用（StrongReference）：垃圾回收器绝不会回收它
+	软引用（SoftReference）：内存空间足够，垃圾回收器就不会回收它，如果内存空间不足了，就会回收这些对象的内存
+	若引用（WeakReference）：一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存
+	虚引用（PhantomReference）：发现它还有虚引用，就会在回收对象的内存之前，把这个虚引用加入到与之关联的引用队列中
+	
+6. Hashcode的作用。
+	A、hashCode的存在主要是用于查找的快捷性，如Hashtable，HashMap等，hashCode是用来在散列存储结构中确定对象的存储地址的；
+
+	B、如果两个对象相同，就是适用于equals(Java.lang.Object) 方法，那么这两个对象的hashCode一定要相同；
+
+	C、如果对象的equals方法被重写，那么对象的hashCode也尽量重写，并且产生hashCode使用的对象，一定要和equals方法中使用的一致，否则就会违反上面提到的第2点；
+
+	D、两个对象的hashCode相同，并不一定表示两个对象就相同，也就是不一定适用于equals(java.lang.Object) 方法，只能够说明这两个对象在散列存储结构中，如Hashtable，他们“存放在同一个篮子里”。
+
+7. ArrayList、LinkedList、Vector的区别。
+	A.ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构
+	B.对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针
+	C.对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据
+	D.Vector与ArrayList一样，也是通过数组实现的，不同的是它支持线程的同步，即某一时刻只有一个线程能够写Vector，避免多线程同时写而引起的不一致性，但实现同步需要很高的花费，因此，访问它比访问ArrayList慢。
+	
+8. String、StringBuffer与StringBuilder的区别。
+	String类是不可变类，任何对String的改变都 会引发新的String对象的生成
+	StringBuffer则是可变类，任何对它所指代的字符串的改变都不会产生新的对象(线程安全)
+	StringBuilder类不是线程安全的，但其在单线程中的性能比StringBuffer高
+	
+9. Map、Set、List、Queue、Stack的特点与用法。
+
+10. HashMap和HashTable的区别。
+	A.历史原因: Hashtable是给予陈旧的Dictonary类的, HashMap是Java1.2引进的Map接口的一个实现
+	B.HashMap允许空的键值对, 而HashTable不允许
+	C.HashTable同步，而HashMap非同步，效率上比HashTable要高
+	
+11. HashMap和ConcurrentHashMap的区别，HashMap的底层源码。
+
+12. TreeMap、HashMap、LindedHashMap的区别。
+
+13. Collection包结构，与Collections的区别。
+
+14. try catch finally，try里有return，finally还执行么？
+	执行
+	
+15. Excption与Error包结构。OOM你遇到过哪些情况，SOF你遇到过哪些情况。
+
+16. Java面向对象的三个特征与含义。
+
+17. Override和Overload的含义去区别。
+
+18. Interface与abstract类的区别。
+
+19. Static class 与non static class的区别。
+
+20. java多态的实现原理。
+
+21. 实现多线程的两种方法：Thread与Runable。
+
+22. 线程同步的方法：sychronized、lock、reentrantLock等。
+
+23. 锁的等级：方法锁、对象锁、类锁。
+
+24. 写出生产者消费者模式。
+
+25. ThreadLocal的设计理念与作用。
+
+26. ThreadPool用法与优势。
+
+27. Concurrent包里的其他东西：ArrayBlockingQueue、CountDownLatch等等。
+
+28. wait()和sleep()的区别。
+
+29. foreach与正常for循环效率对比。
+
+30. Java IO与NIO。
+
+31. 反射的作用于原理。
+	A.先看一下反射的概念：
+		主要是指程序可以访问，检测和修改它本身状态或行为的一种能力，并能根据自身行为的状态和结果，调整或修改应用所描述行为的状态和相关的语义。
+		反射是Java中一种强大的工具，能够使我们很方便的创建灵活的代码，这些代码可以再运行时装配，无需在组件之间进行源代码链接。但是反射使用不当会成本很高！
+		看概念很晕的，继续往下看。
+ 
+     B.反射机制的作用：
+		1，反编译：.class-->.java
+		2,通过反射机制访问java对象的属性，方法，构造方法等
+		
+32. 泛型常用特点，List<String>能否转为List<Object>。
+	
+33. 解析XML的几种方式的原理与特点：DOM、SAX、PULL。
+
+34. Java与C++对比。
+	A.Java中对内存的分配是动态的
+	B.Java不在所有类之外定义全局变量
+	C.Java不用goto语句,而是用try-catch-finally异常处理语句来代替goto语句处理出错的功能.
+	D.Java不支持头文件
+	E.Java不支持宏定义
+	F.Java对每种数据类型都分配固定长度
+	G.类型转换不同
+	H.结构和联合的处理
+	I.Java不再使用指针
+	
+35. Java1.7与1.8新特性。
+
+36. 设计模式：单例、工厂、适配器、责任链、观察者等等。
+
+37. JNI的使用。
+
+38.请简述在异常当中，throw和throws有什么区别
+	A.throw代表动作，表示抛出一个异常的动作；throws代表一种状态，代表方法可能有异常抛出
+	B.throw用在方法实现中，而throws用在方法声明中
+	C.throw只能用于抛出一种异常，而throws可以抛出多个异常
