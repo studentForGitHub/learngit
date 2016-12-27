@@ -48,9 +48,9 @@
 	D.Vector与ArrayList一样，也是通过数组实现的，不同的是它支持线程的同步，即某一时刻只有一个线程能够写Vector，避免多线程同时写而引起的不一致性，但实现同步需要很高的花费，因此，访问它比访问ArrayList慢。
 	
 8. String、StringBuffer与StringBuilder的区别。
-	String类是不可变类，任何对String的改变都 会引发新的String对象的生成
-	StringBuffer则是可变类，任何对它所指代的字符串的改变都不会产生新的对象(线程安全)
-	StringBuilder类不是线程安全的，但其在单线程中的性能比StringBuffer高
+	String类的内容一旦声明则不可改变，而StringBuffer、StringBuilder的内容可以改变；
+	String、StringBuffer、StringBuilder都是CharSequence接口的子类；
+	StringBuffer是从JDK1.0时提供的，属于线程安全操作，而StringBuilder是从JDK1.5开始提供的，属于非线程安全操作、性能更高
 	
 9. Map、Set、List、Queue、Stack的特点与用法。
 
@@ -60,7 +60,16 @@
 	C.HashTable同步，而HashMap非同步，效率上比HashTable要高
 	
 11. HashMap和ConcurrentHashMap的区别，HashMap的底层源码。
+	ConcurrentHashMap中的key和value值都不能为null，HashMap中key可以为null，HashTable中key不能为null。
+	ConcurrentHashMap是线程安全的类并不能保证使用了ConcurrentHashMap的操作都是线程安全的！
+	ConcurrentHashMap的get操作不需要加锁，put操作需要加锁
 
+	HashMap基于hashing原理，我们通过put()和get()方法储存和获取对象。当我们将键值对传递给put()方法时，
+	它调用键对象的hashCode()方法来计算hashcode，让后找到bucket位置来储存值对象。当获取对象时，通过键对象的equals()方法找到正确的键值对，
+	然后返回值对象。HashMap使用链表来解决碰撞问题，当发生碰撞了，对象将会储存在链表的下一个节点中。 HashMap在每个链表节点中储存键值对对象。
+
+	当两个不同的键对象的hashcode相同时会发生什么？ 它们会储存在同一个bucket位置的链表中。键对象的equals()方法用来找到键值对。
+	
 12. TreeMap、HashMap、LindedHashMap的区别。
 
 13. Collection包结构，与Collections的区别。
@@ -69,6 +78,12 @@
 	执行
 	
 15. Excption与Error包结构。OOM你遇到过哪些情况，SOF你遇到过哪些情况。
+	内存泄露和内存溢出的区别：
+
+	内存泄露是指分配出去的内存没有被回收回来，由于失去了对该内存区域的控制，因而造成了资源的浪费。
+	Java中一般不会产生内存泄露，因为有垃圾回收器自动回收垃圾，但这也不绝对，当我们new了对象，并保存了其引用，但是后面一直没用它，而垃圾回收器又不会去回收它，这边会造成内存泄露，
+
+	内存溢出是指程序所需要的内存超出了系统所能分配的内存（包括动态扩展）的上限。
 
 16. Java面向对象的三个特征与含义。
 
@@ -87,7 +102,101 @@
 23. 锁的等级：方法锁、对象锁、类锁。
 
 24. 写出生产者消费者模式。
+	package com.whs.thread;
+	//主方法
+	public class ProductConsumeTest {
+		
+		public static void main(String[] args) {
+			// TODO Auto-generated method stub
+			Info info = new Info();
+			Product p = new Product(info);
+			Consume c = new Consume(info);
+			new Thread(p).start();
+			new Thread(c).start();
+		}
+	}
 
+	//生产者
+	class Product implements Runnable {
+		private Info info = null;
+
+		public Product(Info info) {
+			this.info = info;
+		}
+
+		@Override
+		public void run() {
+			for (int i = 0; i < 50; i++) {
+				if (i % 2 == 0) {
+					this.info.set("淘汰浪", "大灰狼");
+				} else {
+					this.info.set("可爱小动物", "小狗");
+				}
+
+			}
+		}
+	}
+
+	//消费者
+	class Consume implements Runnable {
+		private Info info;
+
+		public Consume(Info info) {
+			this.info = info;
+		}
+
+		@Override
+		public void run() {
+			for (int i = 0; i < 50; i++) {
+				this.info.get();
+			}
+		}
+	}
+
+	//共享数据
+	public class Info {
+		private String title;
+		private String content;
+		
+		private boolean flag = true;
+
+		public synchronized void set(String title, String content) {
+			if (!flag) {
+				try {
+					super.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			this.title = title;
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			this.content = content;
+			flag = false; //可以取走
+			super.notify();
+		}
+
+		public synchronized void get() {
+			if (flag) {
+				try {
+					super.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println(this.title + "-->" + this.content);
+			flag = true; //可以生产
+			super.notify();
+		}
+	}
 25. ThreadLocal的设计理念与作用。
 
 26. ThreadPool用法与优势。
@@ -95,8 +204,11 @@
 27. Concurrent包里的其他东西：ArrayBlockingQueue、CountDownLatch等等。
 
 28. wait()和sleep()的区别。
-
+	sleep是Thread类定义的方法，在休眠到一定时间之后将自己唤醒；
+	wait是Object定义个的方法，必须通过notify()、notifyAll()方法来进行唤醒
+	
 29. foreach与正常for循环效率对比。
+	for循环效率高
 
 30. Java IO与NIO。
 
@@ -127,11 +239,96 @@
 	
 35. Java1.7与1.8新特性。
 
-36. 设计模式：单例、工厂、适配器、责任链、观察者等等。
+36. 设计模式：单例模式
+	单例模式是一种常见的设计模式，单例模式的写法有好几种，这里主要介绍三种：懒汉式单例、饿汉式单例、登记式单例（可忽略）。
+	单例模式有以下特点：
+	　　1、单例类只能有一个实例。
+	　　2、单例类必须自己创建自己的唯一实例。
+	　　3、单例类必须给所有其他对象提供这一实例。
+	懒汉式单例实现
+		1、非线程安全
+		public class Singleton {  
+			private Singleton() {}  
+			private static Singleton single=null;  
+			//静态工厂方法   
+			public static Singleton getInstance() {  
+				 if (single == null) {    
+					 single = new Singleton();  
+				 }    
+				return single;  
+			}  
+		}
+		2、在getInstance方法上加同步
+		public class Singleton {  
+			private Singleton() {}  
+			private static Singleton single=null;  
+			//静态工厂方法   
+			public static synchronized Singleton getInstance() {  
+			 if (single == null) {    
+				 single = new Singleton();  
+			 }    
+				return single;  
+			}  
+		}
+		3、双重检查锁定
+		public class Singleton {  
+			private Singleton() {}  
+			private static Singleton single=null;  
+			//静态工厂方法   
+			public static Singleton getInstance() {  
+				if (singleton == null) {    
+					synchronized (Singleton.class) {    
+					   if (singleton == null) {    
+						  singleton = new Singleton();   
+					   }    
+					}    
+				}    
+				return singleton;   
+			}  
+		}
+		4、静态内部类
+		public class Singleton {    
+			private static class LazyHolder {    
+			   private static final Singleton INSTANCE = new Singleton();    
+			}    
+			private Singleton (){}    
+			public static final Singleton getInstance() {    
+			   return LazyHolder.INSTANCE;    
+			}    
+		}
+	饿汉式单例实现：
+		//饿汉式单例类.在类初始化时，已经自行实例化   
+		public class Singleton1 {  
+			private Singleton1() {}  
+			private static final Singleton1 single = new Singleton1();  
+			//静态工厂方法   
+			public static Singleton1 getInstance() {  
+				return single;  
+			}  
+		}  
+	饿汉式和懒汉式区别：
+		饿汉就是类一旦加载，就把单例初始化完成，保证getInstance的时候，单例是已经存在的了，而懒汉比较懒，只有当调用getInstance的时候，才回去初始化这个单例；
+		饿汉式天生就是线程安全的，可以直接用于多线程而不会出现问题，而懒汉式本身是非线程安全的，为了实现线程安全有几种写法，分别是上面的2、3、4，这三种实现在资源加载和性能方面有些区别。
+36. 设计模式：工厂模式
+	A.简单工厂模式是由一个具体的类去创建其他类的实例，父类是相同的，父类是具体的。 
+	B.工厂方法模式是有一个抽象的父类定义公共接口，子类负责生成具体的对象，这样做的目的是将类的实例化操作延迟到子类中完成。 
+	C.抽象工厂模式提供一个创建一系列相关或相互依赖对象的接口，而无须指定他们具体的类。它针对的是有多个产品的等级结构。而工厂方法模式针对的是一个产品的等级结构。
+
+36. 设计模式：单例模式、工厂、适配器、责任链、观察者等等。
+36. 设计模式：单例模式、工厂、适配器、责任链、观察者等等。
+36. 设计模式：单例模式、工厂、适配器、责任链、观察者等等。
 
 37. JNI的使用。
+	了解JNI：JAVA因其跨平台特性而受人们喜爱，也正因此，使得它和本机各种内部联系变得很少，
+	所以JNI(Java Native Interface)就是用来解决JAVA本地操作的一种方式。
+	JAVA通过JNI调用本地方法，而本地方法是以库文件的形式存放的（在WINDOWS平台上是DLL文件形式，在UNIX机器上是SO文件形式）。
+	通过调用本地的库文件的内部方法，使JAVA可以实现和本地机器的紧密联系，调用系统级的各接口方法。
 
 38.请简述在异常当中，throw和throws有什么区别
 	A.throw代表动作，表示抛出一个异常的动作；throws代表一种状态，代表方法可能有异常抛出
 	B.throw用在方法实现中，而throws用在方法声明中
 	C.throw只能用于抛出一种异常，而throws可以抛出多个异常
+	
+39.Minor GC 和Full GC区别
+	新生代GC(Minor GC)：指发生在新生代的垃圾收集动作，因为对象大多都具备朝生夕灭特性，所以Minor GC非常频繁，回收速度也比较快。
+	老年代GC(Major GC / Full GC)：指发生在老年代中的GC，出现Major GC后，经常会伴随至少一次的 Minor GC。Major GC的速度一般会比Minor GC慢10倍以上。
